@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableMap;
@@ -14,6 +16,9 @@ import freemarker.template.Configuration;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import spark.*;
 import spark.template.freemarker.FreeMarkerEngine;
 
@@ -80,6 +85,7 @@ public final class Main {
     // Allows requests from any domain (i.e., any URL). This makes development
     // easier, but it’s not a good idea for deployment.
     Spark.before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
+    Spark.post("/results", new ResultsHandler());
   }
 
   /**
@@ -110,14 +116,30 @@ public final class Main {
       // TODO: Get JSONObject from req and use it to get the value of the sun, moon,
       // and rising
       // for generating matches
+      JSONObject reqJson;
+      try {
+        // TODO: use the MatchMaker.makeMatches method to get matches
 
-      // TODO: use the MatchMaker.makeMatches method to get matches
+        // TODO: create an immutable map using the matches
 
-      // TODO: create an immutable map using the matches
+        // TODO: return a json of the suggestions (HINT: use GSON.toJson())
 
-      // TODO: return a json of the suggestions (HINT: use GSON.toJson())
-      Gson GSON = new Gson();
-      return null;
+        reqJson = new JSONObject(req.body());
+        String sun = reqJson.getString("sun");
+        String moon = reqJson.getString("moon");
+        String rising = reqJson.getString("rising");
+
+        List<String> list = MatchMaker.makeMatches(sun, moon, rising);
+
+        Map map = ImmutableMap.of("map", list);
+
+        Gson GSON = new Gson();
+        return GSON.toJson(map);
+
+      } catch (JSONException e) {
+        e.printStackTrace();
+      }
+      return "error";
     }
   }
 }
